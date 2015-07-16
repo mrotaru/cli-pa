@@ -7,6 +7,11 @@ function spliceFirst(array) {
   return array.splice(0,1)[0];
 }
 
+// http://stackoverflow.com/a/1830844/447661
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
 process.argv.splice(0,2);
 var args = process.argv;
 var database = './default.db';
@@ -26,7 +31,7 @@ db.loadDatabase(function (err) {
         input: process.stdin,
         output: process.stdout
       });
-      rl.question("No avatars found; please enter a name for your avatar:  ", function(answer) {
+      rl.question("No avatars found; please enter a name for your avatar: ", function(answer) {
         db.insert({type: "avatar", name: answer, points: 0}, function(err, inserted){
           avatar = inserted;
           console.log('Welcome, ' + answer + '. Start accumulating points by completing your todo\'s and dailies!');
@@ -40,7 +45,11 @@ db.loadDatabase(function (err) {
     if(command1 === 'todo') {
       if(command2 === 'new') {
         var title =  spliceFirst(args);
-        db.insert({type: 'todo', title: title, done: false, created: new Date() }, function(err, newDoc){
+        var value =  spliceFirst(args);
+        if(!isNumeric(value)) {
+          throw new Error('Value must be a number; this is not a number: ' +  value);
+        }
+        db.insert({type: 'todo', title: title, done: false, value: value, created: new Date() }, function(err, newDoc){
           console.log('added todo: '+ title);
         });
       } else if (command2 === 'list') {
@@ -55,7 +64,7 @@ db.loadDatabase(function (err) {
                 var doc = docs[i];
                 listDb.insert({listIndex: i+1, docId: doc._id}, function(err, inserted){
                 });
-                console.log((i+1).toString() + '. ' + doc.title);
+                console.log((i+1).toString() + '. ' + doc.title + ' ' + (doc.value ? '(' + doc.value + ')':''));
               }
             });
           });
@@ -68,12 +77,28 @@ db.loadDatabase(function (err) {
             if(foundDocs.length < 1) {
               throw new Error('No document found');
             }
-            var foundDoc = foundDocs[0];
-            db.update({_id: foundDoc.docId}, { $set: {done: true} }, {}, function(err, found){
+            var listingResult = foundDocs[0];
+            var foundDoc = null;
+            console.log(listingResult);
+            db.update({_id: listingResult.docId}, { $set: {done: true} }, {}, function(err, num){
               if(err) {
                 console.log(err);
               } else {
-                console.log('done: ', found);
+                db.find({_id: listingResult.docId}, function(err, foundDocs){
+                  found = foundDocs[0];
+                  var doneValue = found.value ? found.value : 0;
+                  var newScore = Number.parseFloat(found.value) + Number.parseFloat(avatar.points);
+                  if(doneValue) {
+                    db.update({_id: avatar._id}, { $set: {points: newScore}}, {}, function(err, num, updated){
+                      if(err) {
+                        console.log(err);
+                      } else {
+                        console.log(avatar.name, 'gained', doneValue, 'points.');
+                      }
+                    });
+                  }
+                  console.log('done; ' + avatar.name + ' gained ' );
+                });
               }
             });
           });
