@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "bluebird": "^2.9.34",
+    "debug": "^2.2.0",
     "nedb": "^1.1.2",
     "yargs": "^3.15.0"
   }

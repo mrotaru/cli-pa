@@ -1,12 +1,42 @@
 var Promise = require('bluebird');
 var _list = require('./list.js');
  
+function spliceFirst(array) {
+  return array.splice(0,1)[0];
+}
+
 // http://stackoverflow.com/a/1830844/447661
 function isNumeric(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
+/**
+ * Marks task with the id `id` as "done", and adds points to the
+ * current avatar, if any.
+ */
+function done(db, id) {
+  return db.updateAsync({_id: id}, { $set: {done: true} }, {}).then(function(err, num){
+    return db.findAsync({_id: id}).then(function(foundDocs){
+      found = foundDocs[0];
+      var doneValue = found.value ? found.value : 0;
+      var newScore = Number.parseFloat(found.value) + Number.parseFloat(avatar.points);
+      if(doneValue) {
+        return db.updateAsync({_id: avatar._id}, { $set: {points: newScore}}, {}).then(function(err, num, updated){
+          if(num !== 1) {
+            throw new Error('Not updated');
+          }
+        });
+      }
+    });
+  });
+}
+
 module.exports = {
+
+  /**
+   * Create a new todo in `db`. Args must be an array, and contain two
+   * values: title and value in points.
+   */
   create: function create(db, args) {
     if(args.length === 0) {
       return Promise.reject('Need at least two arguments');
@@ -22,30 +52,18 @@ module.exports = {
     }
   },
 
-  done: function done(db, id) {
-    return db.updateAsync({_id: id}, { $set: {done: true} }, {}).then(function(err, num){
-      return db.findAsync({_id: id}).then(function(foundDocs){
-        found = foundDocs[0];
-        var doneValue = found.value ? found.value : 0;
-        var newScore = Number.parseFloat(found.value) + Number.parseFloat(avatar.points);
-        if(doneValue) {
-          return db.updateAsync({_id: avatar._id}, { $set: {points: newScore}}, {}).then(function(err, num, updated){
-            if(num !== 1) {
-              throw new Error('Not updated');
-            }
-          });
-        }
-      });
-    });
-  },
+  done: done,
 
-  doneListNumber: function doneListNumber(db, number) {
-    return _list.getListItemsID(db, number).then(function(id){
+  /**
+   * Marks task number `number` in the last listing as done.
+   */
+  _doneListNumber: function _doneListNumber(db, listDbFile, number) {
+    return _list.getListItemsID(listDbFile, number).then(function(id){
       return done(db, id);
     });
   },
 
-  list: function list() {
-    return _list.list('./listing.db',  {$and: [{type: 'todo'},{done: false}]});
+  list: function list(db) {
+    return _list.list(db, './listing.db',  {$and: [{type: 'todo'},{done: false}]});
   }
 }

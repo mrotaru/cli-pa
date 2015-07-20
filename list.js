@@ -1,16 +1,23 @@
 var Promise = require('bluebird');
 var fs = Promise.promisifyAll(require('fs'));
 var Datastore = require('nedb');
+var debug = require('debug')('listing');
 Promise.promisifyAll(Datastore.prototype);
 var errorHandler = require('./utils.js').errorHandler;
 
 // queryObject  
 module.exports = {
-  list: function list(db, queryObject) {
-    return fs.unlinkAsync(db).then(function(){
-      var listDb = new Datastore({ filename: db});
+
+  /**
+   * Query `dbFile`, and write results into `listDbFile`. Output
+   * each found result, with it's corresponding number.
+   */
+  list: function list(db, listDbFile, queryObject) {
+    return fs.unlinkAsync(listDbFile).then(function(){
+      var listDb = new Datastore({ filename: listDbFile});
       return listDb.loadDatabaseAsync().then(function(){
         return db.findAsync(queryObject).then(function(docs){
+          debug('found in db: ',arguments);
           for (var i=0; i < docs.length; ++i) {
             var doc = docs[i];
             console.log((i+1).toString() + '. ' + doc.title + ' ' + (doc.value ? '(' + doc.value + ')':''));
@@ -22,13 +29,14 @@ module.exports = {
   },
 
   // returns promise of the `_id` of item with `number` in last listing
-  getListItemsID: function getListNumber(db, number) {
-    var listDb = new Datastore({ filename: db});
+  getListItemsID: function getListNumber(listDbFile, number) {
+    var listDb = new Datastore({ filename: listDbFile});
     return listDb.loadDatabaseAsync().then(function(){
       return listDb.findAsync({listIndex: number}).then(function(foundDocs){
         if(foundDocs.length < 1) {
           throw new Error('No document found');
         }
+        debug('item nubmer ' + number + ' in ' + listDbFile, foundDocs);
         return Promise.resolve(foundDocs[0].docId);
       });
     }).catch(errorHandler);
