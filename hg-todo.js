@@ -4,27 +4,6 @@ var path = require('path');
 var _list = require('./lib/list.js');
 var _utils = require('./lib/utils.js');
  
-/**
- * Marks task with the id `id` as "done", and adds points to the
- * current avatar, if any.
- */
-function done(db, id) {
-  return db.updateAsync({_id: id}, { $set: {done: true} }, {}).then(function(err, num){
-    return db.findAsync({_id: id}).then(function(foundDocs){
-      found = foundDocs[0];
-      var doneValue = found.value ? found.value : 0;
-      var newScore = Number.parseFloat(found.value) + Number.parseFloat(avatar.points);
-      if(doneValue) {
-        return db.updateAsync({_id: avatar._id}, { $set: {points: newScore}}, {}).then(function(err, num, updated){
-          if(num !== 1) {
-            throw new Error('Not updated');
-          }
-        });
-      }
-    });
-  });
-}
-
 module.exports = {
 
   /**
@@ -46,14 +25,16 @@ module.exports = {
     }
   },
 
-  done: done,
+  done: function doneTodo(db, id) {
+    return _utils.done(db, id, {done: true});
+  },
 
   /**
    * Marks task number `number` in the last listing as done.
    */
   _doneListNumber: function _doneListNumber(db, listDbFile, number) {
     return _list.getListItemsID(listDbFile, number).then(function(id){
-      return done(db, id);
+      return _utils.done(db, id, {done: true});
     });
   },
 

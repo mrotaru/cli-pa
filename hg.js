@@ -8,6 +8,7 @@ var _utils = require('./lib/utils.js');
 
 var _todo = require('./hg-todo.js');
 var _avatar = require('./hg-avatar.js');
+var _daily = require('./hg-daily.js');
 
 process.argv.splice(0,2);
 var args = process.argv;
@@ -23,7 +24,7 @@ _db.init({filename: dbFile}, 'nedb').then(function(db){
     } else if (command2 === 'list') {
       return _todo.list(db, args);
     } else if (command2 === 'done') {
-      var listIndex = Number.parseInt(spliceFirst(args));
+      var listIndex = Number.parseInt(_utils.spliceFirst(args));
       return _todo._doneListNumber(db, todoListDbFile, listIndex, args);
     }
   } else if(command1 === 'avatar') {
