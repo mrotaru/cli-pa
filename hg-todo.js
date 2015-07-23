@@ -1,4 +1,5 @@
 var Promise = require('bluebird');
+var path = require('path');
 
 var _list = require('./lib/list.js');
 var _utils = require('./lib/utils.js');
@@ -35,7 +36,7 @@ module.exports = {
       return Promise.reject('Need at least two arguments');
     } else {
       var title =  _utils.spliceFirst(args);
-      var value =  _utils.spliceFirst(args);
+      var value =  _utils.spliceFirst(args) || 10;
       if(!_utils.isNumeric(value)) {
         throw new Error('Value must be a number; this is not a number: ' +  value);
       }
@@ -57,6 +58,6 @@ module.exports = {
   },
 
   list: function list(db) {
-    return _list.list(db, './listing.db',  {$and: [{type: 'todo'},{done: false}]});
+    return _list.list(db, path.resolve('./listing.db'),  {$and: [{type: 'todo'},{done: false}]});
   }
 }
