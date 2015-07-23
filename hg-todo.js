@@ -1,15 +1,8 @@
 var Promise = require('bluebird');
-var _list = require('./list.js');
+
+var _list = require('./lib/list.js');
+var _utils = require('./lib/utils.js');
  
-function spliceFirst(array) {
-  return array.splice(0,1)[0];
-}
-
-// http://stackoverflow.com/a/1830844/447661
-function isNumeric(n) {
-  return !isNaN(parseFloat(n)) && isFinite(n);
-}
-
 /**
  * Marks task with the id `id` as "done", and adds points to the
  * current avatar, if any.
@@ -41,9 +34,9 @@ module.exports = {
     if(args.length === 0) {
       return Promise.reject('Need at least two arguments');
     } else {
-      var title =  spliceFirst(args);
-      var value =  spliceFirst(args);
-      if(!isNumeric(value)) {
+      var title =  _utils.spliceFirst(args);
+      var value =  _utils.spliceFirst(args);
+      if(!_utils.isNumeric(value)) {
         throw new Error('Value must be a number; this is not a number: ' +  value);
       }
       return db.insertAsync({type: 'todo', title: title, done: false, value: value, created: new Date() }).then(function(){
