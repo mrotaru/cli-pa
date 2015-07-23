@@ -14,6 +14,7 @@ process.argv.splice(0,2);
 var args = process.argv;
 var dbFile = './default.db';
 var todoListDbFile = './listing.db';
+var dailyListDbFile = './listing-daily.db';
 var command1 = _utils.spliceFirst(args);
 var command2 = _utils.spliceFirst(args);
 
@@ -26,6 +27,15 @@ _db.init({filename: dbFile}, 'nedb').then(function(db){
     } else if (command2 === 'done') {
       var listIndex = Number.parseInt(_utils.spliceFirst(args));
       return _todo._doneListNumber(db, todoListDbFile, listIndex, args);
+    }
+  } else if(command1 === 'daily') {
+    if(command2 === 'new') {
+      return _daily.create(db, args);
+    } else if (command2 === 'list') {
+      return _daily.list(db, dailyListDbFile, args);
+    } else if (command2 === 'done') {
+      var listIndex = Number.parseInt(_utils.spliceFirst(args));
+      return _daily._doneListNumber(db, dailyListDbFile, listIndex, args);
     }
   } else if(command1 === 'avatar') {
     _avatar.load(db).then(function(avatar){
