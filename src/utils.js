@@ -61,24 +61,41 @@ module.exports.itemFromArgsGen = function itemFromArgsGen(type, schema, cliFreeA
   return itemFromArgs;
 };
 
+function findCommand(searchedName, commands) {
+  for (var command in commands) {
+    var c = commands[command];
+    if(command === searchedName) {
+      return c;
+    }
+    if(c.aliases && c.aliases.length) {
+      for (var j=0; j < c.aliases.length; ++j) {
+        if(c.aliases[j] === searchedName) {
+          return c;
+        }
+      }
+    }
+  }
+  return false;
+}
+
 
 /**
- * Returns command in `args` if it's in `legal`, or `false` if not
+ * Returns command in `args` if it's in `commands`, or `false` if not
  *
  * @param {Array} argv
- * @param {Array} legal
+ * @param {Object} commands each prop is an object with `name`, `action`, etc
  * @param {String}        options.messageBefore 
  * @param {String}        options.messageAfter 
  * @param {Boolean=false} options.silent prints nothing
  * @param {Boolean=false} options.noSplice will not remove anything from `args._`
  * @param {Boolean=false} options.noSpliceWhenUnrecognized
  * @param {Boolean=false} options.showLegal when cmd is illegal, show legal cmds
- * @param {String}        options.defaultCmd
- * @param {String}        options.defaultUnrecognized
+ * @param {String}        options.defaultNoArgs
+ * @param {String}        options.defaultWithArgs
  *
- * @return {String|false} legal subcommand, or false
+ * @return {Function|false} legal subcommand, or false
  */
-module.exports.getCommand = function getCommand(args, legal, options) {
+module.exports.getCommand = function getCommand(args, commands, options) {
   var debug = require('debug')('getCommand');
   debug(args);
   var opts = {
@@ -88,25 +105,29 @@ module.exports.getCommand = function getCommand(args, legal, options) {
     noSplice: false,
     noSpliceWhenUnrecognized: false,
     showLegal: true,
-    defaultCmd: null,
-    defaultUnrecognized: null
+    defaultNoArgs: null,
+    defaultWithArgs: null
   };
   _.assign(opts, options);
 
   if(!args._.length) {
-    if(opts.defaultCmd) {
-      return opts.defaultCmd;
+    if(opts.defaultNoArgs) {
+      if(commands.hasOwnProperty(opts.defaultNoArgs)) {
+        return commands[opts.defaultNoArgs];
+      } else {
+        return false;
+      }
     }
   }
 
   var subcommand = opts.noSplice ? args._[0] : args._.splice(0,1)[0];
-  var found = legal.indexOf(subcommand) === -1 ? false : true;
+  var found = findCommand(subcommand, commands);
   if(!found) {
     if(opts.noSpliceWhenUnrecognized) {
       args._.push(subcommand);
     }
-    if(opts.defaultUnrecognized) {
-      return opts.defaultUnrecognized;
+    if(opts.defaultWithArgs && commands.hasOwnProperty(opts.defaultWithArgs)) {
+      return commands[defaultWithArgs];
     }
   }
 
@@ -119,7 +140,7 @@ module.exports.getCommand = function getCommand(args, legal, options) {
         console.error('Unknown command: ' + subcommand);
       }
       if(opts.showLegal) {
-        console.error('Available comands: ' + legal.join(', '));
+        console.error('Available comands: ' + _.keys(commands).join(', '));
       }
       if(opts.messageAfter) {
         console.error(opts.messageAfter);
@@ -127,7 +148,7 @@ module.exports.getCommand = function getCommand(args, legal, options) {
     }
     return false;
   } else {
-    return subcommand;
+    return found;
   }
 }
 

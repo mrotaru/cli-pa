@@ -1,13 +1,13 @@
 {
-  "name": "habitg",
+  "name": "cli-pa",
   "version": "0.0.1",
-  "description": "habitg",
+  "description": "CLI personal assistant",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "habitg": "./bin/cli.js"
+    "pa": "./bin/cli.js"
   },
   "author": "",
   "license": "ISC",

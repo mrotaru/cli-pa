@@ -13,13 +13,15 @@ var core = new HabitG(config);
 function run() {
   core.init().then(function(){
     // which subcommand
-    var subcommand = utils.getCommand(args, ['todo', 'ducks']);
+    var todo = require('./plugins/todo.js');
+    var ducks = require('./plugins/ducks.js');
+    var subcommand = utils.getCommand(args, {todo: todo, ducks: ducks});
     if(!subcommand) {
       process.exit(1);
     }
 
     // load and execute subcommand
-    return require('./' + subcommand + '-cli')._process(core, args);
+    return subcommand.action(core, args);
   }).catch(utils.errorHandler);
 }
 

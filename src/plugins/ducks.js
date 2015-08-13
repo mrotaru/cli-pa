@@ -1,6 +1,6 @@
-var utils = require('./utils.js');
+var utils = require('../utils.js');
 var Promise = require('bluebird');
-var list = require('./list.js');
+var list = require('../list.js');
 var debug = require('debug')('ducks');
 var _ = require('lodash');
 
