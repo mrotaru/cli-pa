@@ -41,7 +41,8 @@ Database.prototype.update = function(id, updateObj) {
   return this.realDb.update({_id: id}, {$set: updateObj});
 }
 
-Database.prototype.delete = function(id) {
+Database.prototype.remove = function(id) {
   debug('deleting', id);
-  return this.delete({_id: id});
+  return this.realDb.remove({_id: id});
 }
+Database.prototype.delete = Database.prototype.remove;

@@ -7,6 +7,29 @@ module.exports.spliceFirst = function spliceFirst(array) {
 }
 
 /**
+ * @returns {Array|false}
+ */
+function arrayFromCommaSeparatedNumbers(str) {
+  if(typeof str !== 'string') {
+    return false;
+  }
+  var result = [];
+  var parts = str.split(',');
+  if(parts.length) {
+    for (var i=0; i < parts.length; ++i) {
+      var p = parts[i];
+      if(p.match(/\d+/)) {
+        result.push(parseInt(p));
+      } else {
+        return false;
+      }
+    }
+    return result;
+  }
+  return false;
+}
+
+/**
  *  Returns a function that parses an item of type `type` from command line
  *  args, and adds `type` and `created`.
  *
@@ -127,7 +150,7 @@ module.exports.getCommand = function getCommand(args, commands, options) {
       args._.push(subcommand);
     }
     if(opts.defaultWithArgs && commands.hasOwnProperty(opts.defaultWithArgs)) {
-      return commands[defaultWithArgs];
+      return commands[opts.defaultWithArgs];
     }
   }
 
