@@ -88,7 +88,7 @@ Todo.prototype.update = function update(db, updateObj) {
 Todo.prototype.delete = function create(db) {
   var self = this;
   if(this._meta.created) {
-    return db.remove({_id: this._id}).then(function(){
+    return db.remove(this._id).then(function(){
       self._meta.created = false;
     });
   } else {

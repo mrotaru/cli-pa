@@ -65,6 +65,7 @@ module.exports = {
           debug('list: ', argv);
           return core.db.read({type: 'duckrow'}).then(function(rows){
             if(!rows.length) {
+              console.log('No ducks.');
               return;
             }
             debug('duckrows:', rows);
@@ -109,7 +110,9 @@ module.exports = {
         action: function duckReset() {
           return getRow().then(function(rows){
             debug('resetting: ',rows[0]);
-            return core.db.remove(rows[0]._id);
+            return core.db.remove(rows[0]._id).then(function(numRemoved){
+              console.log('Ducks removed; no ducks in a row.');
+            });
           });
         }
       }

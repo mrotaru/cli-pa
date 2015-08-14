@@ -42,6 +42,21 @@ module.exports = {
             });
           });
         }
+      },
+      'remove': {
+        description: 'Remove todo item from database.',
+        aliases: ['rm','delete'],
+        action: function() {
+          var index = argv._[0];
+          list.getListItemsID(core, 'todo', index).then(function(id){
+            var todo = new Todo();
+            return todo.read(core.db, {_id: id}).then(function(){
+              return todo.delete(core.db).then(function(){
+                console.log('Removed.');
+              });
+            });
+          });
+        }
       }
     };
 
