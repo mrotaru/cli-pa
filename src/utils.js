@@ -9,7 +9,7 @@ module.exports.spliceFirst = function spliceFirst(array) {
 /**
  * @returns {Array|false}
  */
-function arrayFromCommaSeparatedNumbers(str) {
+module.exports.arrayFromCommaSeparatedNumbers = function arrayFromCommaSeparatedNumbers(str) {
   if(typeof str !== 'string') {
     return false;
   }
