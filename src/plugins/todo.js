@@ -38,7 +38,7 @@ module.exports = {
           list.getListItemsID(core, 'todo', index).then(function(id){
             var todo = new Todo();
             return todo.read(core.db, {_id: id}).then(function(){
-              return todo.update(core.db, {done: true});
+              return todo.update(core.db, {done: true, doneDate: new Date()});
             });
           });
         }
