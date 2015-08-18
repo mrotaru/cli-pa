@@ -52,7 +52,9 @@ Todo.prototype.create = function create(db) {
   debug('creating');
   var self = this;
   return this.validate()
-    .then(db.create(_.omit(this, '_meta')))
+    .then(function(todo){
+      return db.create(_.omit(todo, '_meta'));
+    })
     .then(function(){
       self._meta.created = true;
       debug('created');
@@ -98,12 +100,15 @@ Todo.prototype.delete = function create(db) {
 
 // validate
 Todo.prototype.validate = function validate() {
+  debug('validating: ',this);
   var deferred = Promise.pending();
   var self = this;
   _validate(Todo.schema, this.noMeta(), function(valid, res) {
     if(res.valid) {
+      debug('is valid');
       deferred.fulfill(self);
     } else {
+      debug('not valid');
       deferred.reject(res.format());
     }
   });
