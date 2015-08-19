@@ -6,6 +6,13 @@ module.exports.spliceFirst = function spliceFirst(array) {
   return array.splice(0,1)[0];
 }
 
+module.exports.extractTags = function extractTags(str) {
+  var tagRegex = /\s(?:#([\S]+)\s)/g;
+  var res = tagRegex.exec(str);
+  console.log(res);
+  return res.slice(1);
+}
+
 /**
  * @returns {Array|false}
  */
