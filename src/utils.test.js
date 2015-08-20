@@ -12,3 +12,4 @@ function test(f) {
 }
 
 test(assert.deepEqual, utils.extractTags('a #foo #bar'), ['foo','bar']);
+test(assert.deepEqual, utils.extractTags('a #foo bar'), ['foo']);

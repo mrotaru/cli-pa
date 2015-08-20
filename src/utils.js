@@ -7,10 +7,12 @@ module.exports.spliceFirst = function spliceFirst(array) {
 }
 
 module.exports.extractTags = function extractTags(str) {
-  var tagRegex = /\s(?:#([\S]+)\s)/g;
-  var res = tagRegex.exec(str);
-  console.log(res);
-  return res.slice(1);
+  var tags = [];
+  var res = str.match(/#([a-z]+)/gi);
+  for (var i=0; i < res.length; ++i) {
+    tags.push(res[i].replace(/^#/,''));
+  }
+  return tags;
 }
 
 /**
