@@ -1,6 +1,8 @@
 var list = require('../list.js');
 var utils = require('../utils.js');
 var Todo = require('../models/todo.js');
+var debug = require('debug')('todo:plugin');
+var _ = require('lodash');
 
 module.exports = {
   aliases: ['t'],
@@ -53,6 +55,24 @@ module.exports = {
             return todo.read(core.db, {_id: id}).then(function(){
               return todo.delete(core.db).then(function(){
                 console.log('Removed.');
+              });
+            });
+          });
+        }
+      },
+      'update': {
+        description: 'Update item from database.',
+        action: function() {
+          var index = argv._[0];
+          list.getListItemsID(core, 'todo', index).then(function(id){
+            var _todo = Todo.fromArgs(argv);
+            _todo.updated = new Date();
+            _todo = _.omit(_todo,'created');
+            debug('fromArgs for update:', _todo);
+            var todo = new Todo();
+            return todo.read(core.db, {_id: id}).then(function(){
+              return todo.update(core.db, _todo).then(function(){
+                console.log('Updated.');
               });
             });
           });
