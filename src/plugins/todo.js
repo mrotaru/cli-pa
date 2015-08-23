@@ -27,7 +27,7 @@ module.exports = {
           return core.db.read({
             $where: function(){
               if(this.type !== 'todo') return false;
-              if(this.done  === false || this.recurring) {
+              if(this.done  === false || this.recurringToday) {
                 return true;
               }
               return false;
@@ -82,6 +82,18 @@ module.exports = {
               return todo.update(core.db, _todo).then(function(){
                 console.log('Updated.');
               });
+            });
+          });
+        }
+      },
+      'raw': {
+        description: 'View raw item data.',
+        action: function() {
+          var index = argv._[0];
+          list.getListItemsID(core, 'todo', index).then(function(id){
+            var todo = new Todo();
+            return todo.read(core.db, {_id: id}).then(function(){
+              console.log(require('util').inspect(todo, {colors: true}));
             });
           });
         }
