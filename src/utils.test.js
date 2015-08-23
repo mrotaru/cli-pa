@@ -22,6 +22,19 @@ for (var i=0; i < monkeyPathed.length; ++i) {
       errorMessage(err.message);
     }
   };
+  assert['_' + f] = function() {
+    var args = Array.prototype.slice.call(arguments);
+    var f = args.splice(1);
+    var expected = args.pop();
+    var msg = f.name + '(' + args + ') ' + original.name + ' ' + expected;
+    try {
+      var res = f.apply(args);
+      original.call(res, expected);
+      okMessage(msg);
+    } catch(err) {
+      errorMessage(msg);
+    }
+  };
 }
 var originalThrow = assert.throws;
 assert['throws'] = function(a, b, c) {
@@ -35,3 +48,8 @@ assert['throws'] = function(a, b, c) {
 
 console.log('\u001b[37;1m' + __filename + '\u001b[0m');
 assert.deepEqual(utils.extractTags('a #foo bar'), ['foo']);
+assert.deepEqual(utils.extractTags, 1, 'a #foo bar', ['foo']);
+/*
+ * _deepEqual(utils.extractTags, 'a #foo', ['foo'])
+ * no message - it will be generated
+ */

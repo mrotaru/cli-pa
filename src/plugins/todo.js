@@ -1,6 +1,6 @@
 var list = require('../list.js');
 var utils = require('../utils.js');
-var Todo = require('../models/todo.js');
+var Todo = require('./todo.model.js');
 var debug = require('debug')('todo:plugin');
 var _ = require('lodash');
 
@@ -24,7 +24,15 @@ module.exports = {
         aliases: ['ls'],
         description: 'List todo items.',
         action: function() {
-          return core.db.read({ $and: [{done: false}, {type: 'todo'}]}).then(function(items){
+          return core.db.read({
+            $where: function(){
+              if(this.type !== 'todo') return false;
+              if(this.done  === false || this.recurring) {
+                return true;
+              }
+              return false;
+            }
+          }).then(function(items){
             if(!items.length) {
               console.log('No items.');
             } else {

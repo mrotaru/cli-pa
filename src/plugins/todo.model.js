@@ -1,6 +1,5 @@
 var Promise = require('bluebird');
 var _ = require('lodash');
-//var _validate = Promise.promisify(require('schema-inspector').validate);
 var _validate = require('schema-inspector').validate;
 var utils = require('../utils.js');
 var debug = require('debug')('model:todo');
@@ -13,6 +12,7 @@ Todo.schema = {
     type:  { type: 'string', eq: 'todo' },
     title: { type: 'string' },
     value: { type: 'number' },
+    recurring: { type: 'string' },
     created: { type: 'date' }
   }
 };
@@ -59,6 +59,52 @@ Todo.prototype.create = function create(db) {
       self._meta.created = true;
       debug('created');
     });
+}
+
+Todo.prototype.recurringToday = function recurringToday() {
+
+  /**
+   * @param {Date} d
+   * @return {Number} week number
+   * http://stackoverflow.com/a/6117889/447661*
+   */
+  function getWeekNumber(d) {
+    // Copy date so don't modify original
+    d = new Date(+d);
+    d.setHours(0,0,0);
+    // Set to nearest Thursday: current date + 4 - current day number
+    // Make Sunday's day number 7
+    d.setDate(d.getDate() + 4 - (d.getDay()||7));
+    // Get first day of year
+    var yearStart = new Date(d.getFullYear(),0,1);
+    // Calculate full weeks to nearest Thursday
+    var weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
+    // Return array of year and week number
+    return weekNo;
+  }
+
+  if(!this.recurring) {
+    return false;
+  }
+  if(!this.lastDone) {
+    return true;
+  }
+  var today = new Date().setHours(0,0,0,0);
+  // daily
+  if(this.recurring === 'D') {
+    if(this.lastDone.setHours(0,0,0,0) < today) {
+      return true;
+    } else {
+      return false;
+    }
+  // weekly
+  } else if(this.recurring === 'W') {
+    var lastWeekDone = getWeekNumber(this.lastDone);
+    if(lastWeekDone < getWeekNumber(new Date())) {
+      return true;
+    } 
+  }
+  return false;
 }
 
 // read from database (will overwrite current props)
