@@ -1,7 +1,7 @@
 var list = require('../list.js');
 var utils = require('../utils.js');
 var Todo = require('./todo.model.js');
-var debug = require('debug')('todo:plugin');
+var debug = require('debug')('plugin:todo');
 var _ = require('lodash');
 
 module.exports = {
@@ -27,7 +27,7 @@ module.exports = {
           return core.db.read({
             $where: function(){
               if(this.type !== 'todo') return false;
-              if(this.done  === false || this.recurringToday) {
+              if(this.done  === false || Todo.prototype.recurringToday.call(this)) {
                 return true;
               }
               return false;
