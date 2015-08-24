@@ -12,7 +12,7 @@ Todo.schema = {
     type:  { type: 'string', eq: 'todo' },
     title: { type: 'string' },
     value: { type: 'number' },
-    recurring: { type: 'string' },
+    recurring: { type: 'string', optional: true },
     created: { type: 'date' }
   }
 };
