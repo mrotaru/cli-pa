@@ -18,7 +18,7 @@ Model.prototype.fromObject = function fromObject(obj) {
 
 // validate, and create on database
 Model.prototype.create = function create() {
-  debug('creating model:', this._meta.model.typeString);
+  debug('creating model:', this._meta.model.name);
   var self = this;
   var db = this._meta.model.db;
   return this.validate()
